@@ -12,11 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('contents', function (Blueprint $table) {
-            $table->id();
+            $table->string('content_id')->primary(); // Según diagrama: content_id: string
             $table->json('video')->nullable();
             $table->json('image')->nullable();
             $table->json('text')->nullable();
-            $table->foreignId('node_id')->constrained()->onDelete('cascade');
+            $table->string('node_id'); // Foreign key a nodes
+            $table->foreign('node_id')->references('node_id')->on('nodes')->onDelete('cascade');
             $table->timestamps();
         });
     }

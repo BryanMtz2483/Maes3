@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('node__comments', function (Blueprint $table) {
-            $table->id();
+        Schema::create('node_comments', function (Blueprint $table) {
+            $table->string('node_comment_id')->primary(); // Según diagrama: node_comment_id: string
             $table->text('text');
-            $table->foreignId('node_id')->constrained()->onDelete('cascade');
+            $table->string('node_id'); // Foreign key a nodes
+            $table->foreign('node_id')->references('node_id')->on('nodes')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('node__comments');
+        Schema::dropIfExists('node_comments');
     }
 };

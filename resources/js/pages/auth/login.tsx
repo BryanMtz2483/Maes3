@@ -38,7 +38,7 @@ export default function Login({
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email" className="text-yellow-400 font-semibold">Email address</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -48,17 +48,18 @@ export default function Login({
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="email@example.com"
+                                    className="bg-gray-900 border-yellow-500/20 text-gray-200 placeholder:text-gray-500 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password" className="text-yellow-400 font-semibold">Password</Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
-                                            className="ml-auto text-sm"
+                                            className="ml-auto text-sm text-yellow-400 hover:text-yellow-300"
                                             tabIndex={5}
                                         >
                                             Forgot password?
@@ -73,6 +74,7 @@ export default function Login({
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="Password"
+                                    className="bg-gray-900 border-yellow-500/20 text-gray-200 placeholder:text-gray-500 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -82,13 +84,14 @@ export default function Login({
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
+                                    className="border-yellow-500/40 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember" className="text-gray-300">Remember me</Label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="mt-4 w-full bg-yellow-500 hover:bg-yellow-400 text-black font-semibold"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
@@ -99,9 +102,9 @@ export default function Login({
                         </div>
 
                         {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground">
+                            <div className="text-center text-sm text-gray-400">
                                 Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
+                                <TextLink href={register()} tabIndex={5} className="text-yellow-400 hover:text-yellow-300 font-semibold">
                                     Sign up
                                 </TextLink>
                             </div>

@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('nodes', function (Blueprint $table) {
-            $table->id();
+            $table->string('node_id')->primary(); // Según diagrama: node_id: string
             $table->string('title');
             $table->string('author');
             $table->date('created_date');
-            $table->string('topic')->nullable();
+            $table->string('topic')->nullable(); // logic: string según diagrama
             $table->timestamps();
         });
     }

@@ -32,11 +32,16 @@ export interface SharedData {
 
 export interface User {
     id: number;
-    name: string;
+    name?: string; // Opcional porque algunos usuarios pueden tener solo 'username'
+    username?: string; // Campo alternativo para el nombre
     email: string;
     avatar?: string;
+    profile_pic?: string; // Alias alternativo para avatar
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
+    two_factor_confirmed_at?: string | null;
+    birth_date?: string | null;
+    score?: number;
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...

@@ -12,12 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reactions', function (Blueprint $table) {
-            $table->id();
+            $table->string('reaction_id')->primary(); // Según diagrama: reaction_id: string
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('entity_type');
-            $table->unsignedBigInteger('entity_id');
+            $table->string('entity_type'); // 'node' o 'roadmap'
+            $table->string('entity_id'); // node_id o roadmap_id (ambos son strings)
             $table->string('reaction_type');
             $table->timestamps();
+            
+            // Índice compuesto para evitar reacciones duplicadas
+            $table->unique(['user_id', 'entity_type', 'entity_id', 'reaction_type']);
         });
     }
 

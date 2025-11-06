@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +25,9 @@ class User extends Authenticatable
         'password',
         'birth_date',
         'profile_pic',
+        'avatar',
+        'account_name',
+        'bio',
         'score',
     ];
 
@@ -51,5 +55,21 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Relación con los nodos creados por el usuario
+     */
+    public function nodes()
+    {
+        return $this->hasMany(Node::class, 'user_id');
+    }
+
+    /**
+     * Relación con los roadmaps creados por el usuario
+     */
+    public function roadmaps()
+    {
+        return $this->hasMany(Roadmap::class, 'user_id');
     }
 }

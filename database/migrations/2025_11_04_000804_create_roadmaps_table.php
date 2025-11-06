@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('roadmaps', function (Blueprint $table) {
-            $table->id();
+            $table->string('roadmap_id')->primary(); // Según diagrama: roadmap_id: string
             $table->string('name');
-            $table->string('tags')->nullable();
+            $table->string('tags')->nullable(); // Campo tags según diagrama
+            $table->string('roadmap_id_fk')->nullable(); // Auto-referencia (se agregará FK después)
             $table->timestamps();
         });
     }
