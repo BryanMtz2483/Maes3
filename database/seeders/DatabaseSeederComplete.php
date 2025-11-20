@@ -80,6 +80,9 @@ class DatabaseSeederComplete extends Seeder
             ['tag_id' => 'frontend', 'name' => 'Frontend'],
             ['tag_id' => 'database', 'name' => 'Database'],
             ['tag_id' => 'devops', 'name' => 'DevOps'],
+            ['tag_id' => 'decibilidad', 'name' => 'Decibilidad'],
+            ['tag_id' => 'etica', 'name' => 'Ética'],
+            ['tag_id' => 'valores', 'name' => 'Valores'],
         ];
 
         foreach ($tags as $tag) {
@@ -110,6 +113,18 @@ class DatabaseSeederComplete extends Seeder
                 'name' => 'React Advanced',
                 'tags' => 'frontend',
                 'roadmap_id_fk' => 'fullstack-2025', // Sub-roadmap
+            ],
+            [
+                'roadmap_id' => 'decibilidad-basico',
+                'name' => 'Curso de Decibilidad Básico',
+                'tags' => 'decibilidad,etica,valores',
+                'roadmap_id_fk' => null,
+            ],
+            [
+                'roadmap_id' => 'decibilidad-avanzado',
+                'name' => 'Decibilidad Avanzada',
+                'tags' => 'decibilidad,etica,valores',
+                'roadmap_id_fk' => null,
             ],
         ];
 
@@ -302,15 +317,51 @@ class DatabaseSeederComplete extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'roadmap_id' => 'decibilidad-basico',
+                'tag_id' => 'decibilidad',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'roadmap_id' => 'decibilidad-basico',
+                'tag_id' => 'etica',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'roadmap_id' => 'decibilidad-basico',
+                'tag_id' => 'valores',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'roadmap_id' => 'decibilidad-avanzado',
+                'tag_id' => 'decibilidad',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'roadmap_id' => 'decibilidad-avanzado',
+                'tag_id' => 'etica',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'roadmap_id' => 'decibilidad-avanzado',
+                'tag_id' => 'valores',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
 
-        $this->command->info('✅ Base de datos poblada exitosamente!');
-        $this->command->info('📊 Usuarios: 2');
-        $this->command->info('📊 Roadmaps: 3');
-        $this->command->info('📊 Nodes: 3');
-        $this->command->info('📊 Tags: 5');
-        $this->command->info('📊 Contents: 2');
-        $this->command->info('📊 Comments: 3');
-        $this->command->info('📊 Reactions: 2');
+        $this->command->info('Base de datos poblada exitosamente!');
+        $this->command->info('Usuarios: 2');
+        $this->command->info('Roadmaps: 5 (incluyendo 2 de Decibilidad)');
+        $this->command->info('Nodes: 3');
+        $this->command->info('Tags: 8 (incluyendo Decibilidad, Ética, Valores)');
+        $this->command->info('Contents: 2');
+        $this->command->info('Comments: 3');
+        $this->command->info('Reactions: 2');
     }
 }

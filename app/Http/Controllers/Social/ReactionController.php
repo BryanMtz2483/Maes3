@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Reaction;
 use App\Models\Node;
 use App\Models\Roadmap;
+use App\Models\NodeProgress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -90,6 +91,30 @@ class ReactionController extends Controller
 
         if ($reaction) {
             $reaction->delete();
+            
+            // Si es un like en un nodo, marcarlo como no completado
+            if ($validated['entity_type'] === 'node' && $validated['reaction_type'] === 'like') {
+                NodeProgress::markAsIncomplete(auth()->id(), $validated['entity_id']);
+            }
+            
+            // Si es un like en un roadmap, marcar todos sus nodos como no completados Y eliminar reacciones
+            if ($validated['entity_type'] === 'roadmap' && $validated['reaction_type'] === 'like') {
+                $roadmap = Roadmap::where('roadmap_id', $validated['entity_id'])->first();
+                if ($roadmap) {
+                    foreach ($roadmap->nodes as $node) {
+                        NodeProgress::markAsIncomplete(auth()->id(), $node->node_id);
+                        
+                        // También eliminar reacción de like del nodo si existe
+                        Reaction::where([
+                            'user_id' => auth()->id(),
+                            'entity_type' => 'node',
+                            'entity_id' => $node->node_id,
+                            'reaction_type' => 'like',
+                        ])->delete();
+                    }
+                }
+            }
+            
             return response()->json([
                 'message' => 'Reacción eliminada',
                 'action' => 'removed',
@@ -103,6 +128,31 @@ class ReactionController extends Controller
             'entity_id' => $validated['entity_id'],
             'reaction_type' => $validated['reaction_type'],
         ]);
+
+        // Si es un like en un nodo, marcarlo como completado
+        if ($validated['entity_type'] === 'node' && $validated['reaction_type'] === 'like') {
+            NodeProgress::markAsCompleted(auth()->id(), $validated['entity_id']);
+        }
+        
+        // Si es un like en un roadmap, marcar todos sus nodos como completados Y crear reacciones
+        if ($validated['entity_type'] === 'roadmap' && $validated['reaction_type'] === 'like') {
+            $roadmap = Roadmap::where('roadmap_id', $validated['entity_id'])->first();
+            if ($roadmap) {
+                foreach ($roadmap->nodes as $node) {
+                    NodeProgress::markAsCompleted(auth()->id(), $node->node_id);
+                    
+                    // También crear reacción de like para el nodo si no existe
+                    Reaction::firstOrCreate([
+                        'user_id' => auth()->id(),
+                        'entity_type' => 'node',
+                        'entity_id' => $node->node_id,
+                        'reaction_type' => 'like',
+                    ], [
+                        'reaction_id' => 'r-' . Str::uuid(),
+                    ]);
+                }
+            }
+        }
 
         return response()->json([
             'message' => 'Reacción agregada',

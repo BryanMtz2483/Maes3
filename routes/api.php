@@ -9,6 +9,8 @@ use App\Http\Controllers\API\MobileController;
 use App\Http\Controllers\API\MediaController;
 use App\Http\Controllers\API\AIController;
 use App\Http\Controllers\API\NotificationController;
+use App\Http\Controllers\RoadmapAnalyticsController;
+use App\Http\Controllers\AI\AITutorController;
 
 // ============================================
 // APIs Públicas (sin autenticación)
@@ -115,4 +117,29 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::post('/send', [NotificationController::class, 'send']);
         Route::post('/broadcast', [NotificationController::class, 'broadcast']);
     });
+
+    // ========== Roadmap Analytics (ML) ==========
+    Route::prefix('roadmap-analytics')->group(function () {
+        Route::get('/', [RoadmapAnalyticsController::class, 'index']);
+        Route::get('/top', [RoadmapAnalyticsController::class, 'topRoadmaps']);
+        Route::get('/recommend', [RoadmapAnalyticsController::class, 'recommend']);
+        Route::get('/compare', [RoadmapAnalyticsController::class, 'compareRoadmaps']);
+        Route::get('/analyze/{topic}', [RoadmapAnalyticsController::class, 'analyzeByTopic']);
+        Route::get('/insights', [RoadmapAnalyticsController::class, 'insights']);
+        Route::get('/{roadmapId}', [RoadmapAnalyticsController::class, 'show']);
+    });
+
+    // ========== IA Tutor (Neural Network) ==========
+    Route::prefix('tutor')->group(function () {
+        Route::post('/analyze', [AITutorController::class, 'analyze']);
+        Route::get('/top/{tag}', [AITutorController::class, 'topByTag']);
+    });
+});
+
+// ============================================
+// IA Tutor - Rutas Web (con sesión web)
+// ============================================
+Route::middleware(['web', 'auth'])->prefix('v1/tutor')->group(function () {
+    Route::post('/analyze', [AITutorController::class, 'analyze']);
+    Route::get('/top/{tag}', [AITutorController::class, 'topByTag']);
 });

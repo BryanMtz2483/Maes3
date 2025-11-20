@@ -61,10 +61,10 @@ class CreateSampleNodes extends Command
                 'created_date' => now(),
             ]);
 
-            $this->info("✓ Creado: {$node->title}");
+            $this->info("Creado: {$node->title}");
         }
 
-        $this->info("\n✓ " . count($samples) . " nodos creados exitosamente");
+        $this->info("\n" . count($samples) . " nodos creados exitosamente");
         return 0;
     }
 }

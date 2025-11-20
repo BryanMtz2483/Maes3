@@ -18,22 +18,44 @@ class ProfileController extends Controller
         // Buscar usuario por username
         $user = User::where('username', $username)->firstOrFail();
 
-        // Obtener nodos del usuario
+        // Obtener nodos creados por el usuario
         $nodes = Node::where('user_id', $user->id)
             ->withCount(['reactions', 'comments'])
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Obtener roadmaps del usuario
+        // Obtener roadmaps creados por el usuario
         $roadmaps = Roadmap::where('user_id', $user->id)
             ->withCount(['reactions', 'comments', 'nodes'])
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Calcular estadísticas
+        // Obtener roadmaps completados por el usuario
+        $completedRoadmaps = $user->completedRoadmaps()->map(function ($roadmap) {
+            return [
+                'roadmap_id' => $roadmap->roadmap_id,
+                'name' => $roadmap->name,
+                'description' => $roadmap->description,
+                'cover_image' => $roadmap->cover_image,
+                'created_at' => $roadmap->created_at,
+                'nodes_count' => $roadmap->nodes->count(),
+            ];
+        })->values();
+
+        // Calcular estadísticas completas
         $stats = [
-            'nodes_count' => $nodes->count(),
-            'roadmaps_count' => $roadmaps->count(),
+            // Nodos y roadmaps creados
+            'nodes_created' => $nodes->count(),
+            'roadmaps_created' => $roadmaps->count(),
+            
+            // Progreso del usuario
+            'nodes_completed' => $user->completedNodes()->count(),
+            'roadmaps_completed' => $completedRoadmaps->count(),
+            
+            // Score basado en nodos completados (10 puntos por nodo)
+            'score' => $user->score,
+            
+            // Interacciones sociales
             'total_reactions' => $nodes->sum('reactions_count') + $roadmaps->sum('reactions_count'),
             'total_comments' => $nodes->sum('comments_count') + $roadmaps->sum('comments_count'),
         ];
@@ -42,6 +64,7 @@ class ProfileController extends Controller
             'user' => $user,
             'nodes' => $nodes,
             'roadmaps' => $roadmaps,
+            'completedRoadmaps' => $completedRoadmaps,
             'stats' => $stats,
         ]);
     }

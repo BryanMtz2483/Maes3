@@ -4,10 +4,16 @@ import RichContentRenderer from '@/components/content/rich-content-renderer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Heart, MessageCircle, Share2, Bookmark, ArrowLeft, ThumbsDown } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, ArrowLeft, ThumbsDown, CheckCircle, Frown, Star, Edit, MoreHorizontal } from 'lucide-react';
 import { usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface NodeShowProps {
     node: {
@@ -61,6 +67,9 @@ export default function NodeShow({ node, comments }: NodeShowProps) {
     const [commentsData, setCommentsData] = useState(comments.data || []);
     const [newComment, setNewComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [satisfactionRating, setSatisfactionRating] = useState<number | null>(null);
+    const [hoveredStar, setHoveredStar] = useState<number | null>(null);
+    const [showSurvey, setShowSurvey] = useState(false);
 
     useEffect(() => {
         const loadUserReactions = async () => {
@@ -254,21 +263,42 @@ export default function NodeShow({ node, comments }: NodeShowProps) {
                     <Card className="overflow-hidden border border-yellow-500/20 bg-gradient-to-br from-gray-900 to-black shadow-lg shadow-yellow-500/5">
                         {/* Header */}
                         <div className="p-6 border-b border-yellow-500/10">
-                            <div className="flex items-center gap-4 mb-4">
-                                <Avatar className="h-14 w-14 border-2 border-yellow-500">
-                                    <AvatarImage src={node.author_avatar} />
-                                    <AvatarFallback className="bg-yellow-500 text-black font-semibold text-lg">
-                                        {node.author_name?.[0] || node.author?.[0] || 'U'}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                    <h2 className="text-sm font-semibold text-yellow-400">
-                                        {node.author_username || node.author || 'Usuario'}
-                                    </h2>
-                                    <p className="text-xs text-gray-500">
-                                        {formatDate(node.created_at)}
-                                    </p>
-                                </div>
+                            <div className="flex items-start justify-between mb-4">
+                                <Link href={`/profile/${node.author_username || node.author || 'usuario'}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity group flex-1">
+                                    <Avatar className="h-14 w-14 border-2 border-yellow-500 group-hover:border-yellow-400 transition-colors">
+                                        <AvatarImage src={node.author_avatar} />
+                                        <AvatarFallback className="bg-yellow-500 text-black font-semibold text-lg">
+                                            {node.author_name?.[0] || node.author?.[0] || 'U'}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                        <h2 className="text-sm font-semibold text-yellow-400 group-hover:text-yellow-300 transition-colors">
+                                            @{node.author_username || node.author || 'Usuario'}
+                                        </h2>
+                                        <p className="text-xs text-gray-500">
+                                            {formatDate(node.created_at)}
+                                        </p>
+                                    </div>
+                                </Link>
+                                
+                                {auth?.user?.username === (node.author_username || node.author) && (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10">
+                                                <MoreHorizontal className="h-5 w-5" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="bg-black border-yellow-500/20">
+                                            <DropdownMenuItem 
+                                                onClick={() => window.location.href = `/nodes/${node.node_id}/edit`}
+                                                className="text-gray-300 hover:text-yellow-400 hover:bg-yellow-500/10 cursor-pointer"
+                                            >
+                                                <Edit className="mr-2 h-4 w-4" />
+                                                Editar nodo
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                )}
                             </div>
 
                             <h1 className="text-3xl font-bold text-yellow-400 mb-2">{node.title}</h1>
@@ -316,12 +346,18 @@ export default function NodeShow({ node, comments }: NodeShowProps) {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-12 w-12 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10"
+                                        className="h-12 w-12 text-green-400 hover:text-green-300 hover:bg-green-500/10 relative"
                                         onClick={handleLike}
                                     >
-                                        <Heart className={`h-7 w-7 transition-all ${liked ? 'fill-yellow-400 text-yellow-400 scale-110' : ''}`} />
+                                        <CheckCircle className={`h-7 w-7 transition-all ${liked ? 'fill-green-400 text-green-400 scale-110' : ''}`} />
+                                        {liked && (
+                                            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                            </span>
+                                        )}
                                     </Button>
-                                    <span className="text-lg font-semibold text-yellow-400">{likesCount}</span>
+                                    <span className="text-lg font-semibold text-green-400">{likesCount}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Button
@@ -330,7 +366,7 @@ export default function NodeShow({ node, comments }: NodeShowProps) {
                                         className="h-12 w-12 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                         onClick={handleDislike}
                                     >
-                                        <ThumbsDown className={`h-7 w-7 transition-all ${disliked ? 'fill-red-400 text-red-400 scale-110' : ''}`} />
+                                        <Frown className={`h-7 w-7 transition-all ${disliked ? 'fill-red-400 text-red-400 scale-110' : ''}`} />
                                     </Button>
                                     <span className="text-lg font-semibold text-red-400">{dislikesCount}</span>
                                 </div>
@@ -354,6 +390,17 @@ export default function NodeShow({ node, comments }: NodeShowProps) {
                                 onClick={handleSave}
                             >
                                 <Bookmark className={`h-7 w-7 transition-all ${saved ? 'fill-yellow-400 text-yellow-400 scale-110' : ''}`} />
+                            </Button>
+                        </div>
+
+                        {/* Survey Button */}
+                        <div className="px-6 py-4 border-b border-yellow-500/10">
+                            <Button
+                                onClick={() => setShowSurvey(!showSurvey)}
+                                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3"
+                            >
+                                <Star className="w-5 h-5 mr-2" />
+                                {showSurvey ? 'Ocultar Encuesta' : 'Calificar este Nodo'}
                             </Button>
                         </div>
 
@@ -422,6 +469,41 @@ export default function NodeShow({ node, comments }: NodeShowProps) {
                             </div>
                         </div>
                     </Card>
+
+                    {/* Satisfaction Survey */}
+                    {showSurvey && (
+                        <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20 p-8 mt-6 animate-in fade-in slide-in-from-top duration-500">
+                        <div className="text-center">
+                            <h3 className="text-2xl font-bold text-foreground mb-2">¿Qué te pareció este nodo?</h3>
+                            <p className="text-muted-foreground mb-6">Califica del 1 al 5</p>
+                            
+                            <div className="flex justify-center gap-3 mb-4">
+                                {[1, 2, 3, 4, 5].map((rating) => (
+                                    <Button
+                                        key={rating}
+                                        onClick={() => setSatisfactionRating(rating)}
+                                        variant={satisfactionRating === rating ? "default" : "outline"}
+                                        className={`w-14 h-14 text-lg font-bold transition-all ${
+                                            satisfactionRating === rating 
+                                                ? 'bg-purple-500 hover:bg-purple-600 text-white scale-110' 
+                                                : 'hover:scale-105'
+                                        }`}
+                                    >
+                                        {rating}
+                                    </Button>
+                                ))}
+                            </div>
+                            
+                            {satisfactionRating && (
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <p className="text-lg font-semibold text-purple-400">
+                                        Gracias por tu calificación de {satisfactionRating}/5
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </Card>
+                    )}
                 </div>
             </div>
         </>

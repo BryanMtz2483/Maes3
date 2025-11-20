@@ -1,10 +1,11 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import InstagramNav from '@/components/social/instagram-nav';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
-import { Heart, MessageCircle, ThumbsDown } from 'lucide-react';
+import { Heart, MessageCircle, ThumbsDown, Map, FileText, ChevronLeft, ChevronRight, TrendingUp, CheckCircle } from 'lucide-react';
 
 interface ExploreProps {
     roadmaps?: Array<{
@@ -27,6 +28,17 @@ interface ExploreProps {
         comments_count: number;
         dislikes_count?: number;
     }>;
+    pagination?: {
+        current_page: number;
+        per_page: number;
+        total: number;
+        last_page: number;
+    };
+    filter?: string;
+    totalRoadmaps?: number;
+    totalNodes?: number;
+    popularTopics?: Array<{ topic: string; count: number }>;
+    popularTags?: Record<string, number>;
 }
 
 interface GalleryItem {
@@ -39,12 +51,35 @@ interface GalleryItem {
     dislikes: number;
     comments: number;
     tag: string;
-    height: number; // Para tamaños dinámicos
+    height: number;
 }
 
-export default function Explore({ roadmaps, nodes }: ExploreProps) {
+export default function Explore({ 
+    roadmaps, 
+    nodes, 
+    pagination,
+    filter = 'all',
+    totalRoadmaps = 0,
+    totalNodes = 0,
+    popularTopics = [],
+    popularTags = {}
+}: ExploreProps) {
     const { auth } = usePage().props as any;
     const [selectedTag, setSelectedTag] = useState<string>('all');
+    const [activeFilter, setActiveFilter] = useState(filter);
+
+    const handleFilterChange = (newFilter: string) => {
+        setActiveFilter(newFilter);
+        router.get('/feed/explore', { type: newFilter }, { preserveState: true });
+    };
+
+    const handlePageChange = (page: number) => {
+        router.get('/feed/explore', { type: activeFilter, page }, { preserveState: true });
+    };
+
+    const handleTopicClick = (topic: string) => {
+        router.get('/feed/explore', { topic, type: 'nodes' });
+    };
 
     // Generar alturas aleatorias para efecto masonry
     const getRandomHeight = () => {
@@ -84,153 +119,7 @@ export default function Explore({ roadmaps, nodes }: ExploreProps) {
         })),
     ];
 
-    // Si no hay datos reales, usar ejemplos
-    const galleryItems: GalleryItem[] = allItems.length > 0 ? allItems : [
-        {
-            id: '1',
-            type: 'roadmap',
-            title: 'Full Stack Development 2024',
-            description: 'Guía completa para convertirte en desarrollador full stack',
-            image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop',
-            likes: 1234,
-            dislikes: 12,
-            comments: 56,
-            tag: 'Desarrollo Web',
-            height: 350,
-        },
-        {
-            id: '2',
-            type: 'node',
-            title: 'React Hooks Avanzados',
-            description: 'Domina los hooks de React',
-            image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&h=400&fit=crop',
-            likes: 2341,
-            dislikes: 23,
-            comments: 89,
-            tag: 'Frontend',
-            height: 300,
-        },
-        {
-            id: '3',
-            type: 'roadmap',
-            title: 'Machine Learning para Principiantes',
-            description: 'Aprende ML desde cero',
-            image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop',
-            likes: 987,
-            dislikes: 8,
-            comments: 34,
-            tag: 'IA',
-            height: 400,
-        },
-        {
-            id: '4',
-            type: 'node',
-            title: 'TypeScript Best Practices',
-            description: 'Mejores prácticas de TypeScript',
-            image: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=600&h=400&fit=crop',
-            likes: 1567,
-            dislikes: 15,
-            comments: 67,
-            tag: 'Backend',
-            height: 280,
-        },
-        {
-            id: '5',
-            type: 'roadmap',
-            title: 'DevOps Completo',
-            description: 'De principiante a experto en DevOps',
-            image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&h=400&fit=crop',
-            likes: 3456,
-            dislikes: 34,
-            comments: 123,
-            tag: 'DevOps',
-            height: 450,
-        },
-        {
-            id: '6',
-            type: 'node',
-            title: 'CSS Grid y Flexbox',
-            description: 'Layouts modernos con CSS',
-            image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop',
-            likes: 2109,
-            dislikes: 21,
-            comments: 78,
-            tag: 'Frontend',
-            height: 320,
-        },
-        {
-            id: '7',
-            type: 'roadmap',
-            title: 'Arquitectura de Software',
-            description: 'Diseña sistemas escalables',
-            image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=400&fit=crop',
-            likes: 1876,
-            dislikes: 18,
-            comments: 92,
-            tag: 'Arquitectura',
-            height: 380,
-        },
-        {
-            id: '8',
-            type: 'node',
-            title: 'API REST con Laravel',
-            description: 'Crea APIs profesionales',
-            image: 'https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=600&h=400&fit=crop',
-            likes: 2543,
-            dislikes: 25,
-            comments: 101,
-            tag: 'Backend',
-            height: 340,
-        },
-        {
-            id: '9',
-            type: 'roadmap',
-            title: 'Mobile Development',
-            description: 'Apps nativas y multiplataforma',
-            image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&h=400&fit=crop',
-            likes: 1432,
-            dislikes: 14,
-            comments: 45,
-            tag: 'Mobile',
-            height: 290,
-        },
-        {
-            id: '10',
-            type: 'node',
-            title: 'Docker para Desarrolladores',
-            description: 'Containeriza tus aplicaciones',
-            image: 'https://images.unsplash.com/photo-1605745341112-85968b19335b?w=600&h=400&fit=crop',
-            likes: 1987,
-            dislikes: 19,
-            comments: 67,
-            tag: 'DevOps',
-            height: 360,
-        },
-        {
-            id: '11',
-            type: 'roadmap',
-            title: 'UI/UX Design Fundamentals',
-            description: 'Diseña interfaces increíbles',
-            image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&h=400&fit=crop',
-            likes: 2876,
-            dislikes: 28,
-            comments: 112,
-            tag: 'Diseño',
-            height: 420,
-        },
-        {
-            id: '12',
-            type: 'node',
-            title: 'GraphQL vs REST',
-            description: 'Comparativa completa',
-            image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=400&fit=crop',
-            likes: 1654,
-            dislikes: 16,
-            comments: 54,
-            tag: 'Backend',
-            height: 310,
-        },
-    ];
+    const galleryItems = allItems;
 
     // Extraer tags únicos
     const allTags = ['all', ...Array.from(new Set(galleryItems.map(item => item.tag)))];
@@ -239,6 +128,8 @@ export default function Explore({ roadmaps, nodes }: ExploreProps) {
     const filteredItems = selectedTag === 'all' 
         ? galleryItems 
         : galleryItems.filter(item => item.tag === selectedTag);
+
+    const totalItems = activeFilter === 'roadmaps' ? totalRoadmaps : activeFilter === 'nodes' ? totalNodes : totalRoadmaps + totalNodes;
 
     return (
         <>
@@ -252,12 +143,78 @@ export default function Explore({ roadmaps, nodes }: ExploreProps) {
                         <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
                             Explorar Contenido
                         </h1>
-                        <p className="text-gray-400">Descubre roadmaps y nodos increíbles</p>
+                        <p className="text-gray-400">
+                            Mostrando <span className="font-bold text-yellow-400">{totalItems}</span> artículos
+                            {activeFilter !== 'all' && (
+                                <span className="text-sm"> ({activeFilter === 'roadmaps' ? 'Roadmaps' : 'Nodos'})</span>
+                            )}
+                        </p>
                     </div>
+
+                    {/* Filtros de Tipo */}
+                    <div className="mb-6 flex gap-3">
+                        <Button
+                            onClick={() => handleFilterChange('all')}
+                            variant={activeFilter === 'all' ? 'default' : 'outline'}
+                            className={`flex items-center gap-2 ${
+                                activeFilter === 'all'
+                                    ? 'bg-yellow-500 hover:bg-yellow-600 text-black'
+                                    : 'bg-gray-900 text-yellow-400 border border-yellow-500/20 hover:border-yellow-500/40'
+                            }`}
+                        >
+                            <FileText className="w-4 h-4" />
+                            Todos
+                        </Button>
+                        <Button
+                            onClick={() => handleFilterChange('roadmaps')}
+                            variant={activeFilter === 'roadmaps' ? 'default' : 'outline'}
+                            className={`flex items-center gap-2 ${
+                                activeFilter === 'roadmaps'
+                                    ? 'bg-yellow-500 hover:bg-yellow-600 text-black'
+                                    : 'bg-gray-900 text-yellow-400 border border-yellow-500/20 hover:border-yellow-500/40'
+                            }`}
+                        >
+                            <Map className="w-4 h-4" />
+                            Roadmaps ({totalRoadmaps})
+                        </Button>
+                        <Button
+                            onClick={() => handleFilterChange('nodes')}
+                            variant={activeFilter === 'nodes' ? 'default' : 'outline'}
+                            className={`flex items-center gap-2 ${
+                                activeFilter === 'nodes'
+                                    ? 'bg-yellow-500 hover:bg-yellow-600 text-black'
+                                    : 'bg-gray-900 text-yellow-400 border border-yellow-500/20 hover:border-yellow-500/40'
+                            }`}
+                        >
+                            <FileText className="w-4 h-4" />
+                            Nodos ({totalNodes})
+                        </Button>
+                    </div>
+
+                    {/* Barras de Tendencias */}
+                    {popularTopics.length > 0 && (
+                        <div className="mb-6 bg-gray-900 border border-yellow-500/20 rounded-lg p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <TrendingUp className="w-5 h-5 text-yellow-400" />
+                                <h3 className="text-lg font-semibold text-yellow-400">Temas Populares</h3>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {popularTopics.map((topic) => (
+                                    <button
+                                        key={topic.topic}
+                                        onClick={() => handleTopicClick(topic.topic)}
+                                        className="px-3 py-1 bg-gray-800 hover:bg-yellow-500/20 text-gray-300 hover:text-yellow-400 rounded-full text-sm border border-gray-700 hover:border-yellow-500/40 transition-all"
+                                    >
+                                        {topic.topic} <span className="text-yellow-400">({topic.count})</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Filtros por Tags */}
                     <div className="mb-8 flex flex-wrap gap-3">
-                        {allTags.map((tag) => (
+                        {allTags.slice(0, 10).map((tag) => (
                             <button
                                 key={tag}
                                 onClick={() => setSelectedTag(tag)}
@@ -272,7 +229,7 @@ export default function Explore({ roadmaps, nodes }: ExploreProps) {
                         ))}
                     </div>
                     
-                    {/* Galería Masonry con tamaños dinámicos */}
+                    {/* Galería Masonry */}
                     <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
                         {filteredItems.map((item) => {
                             const href = item.type === 'roadmap' 
@@ -326,8 +283,8 @@ export default function Explore({ roadmaps, nodes }: ExploreProps) {
 
                                                 {/* Stats */}
                                                 <div className="flex items-center gap-6 mt-4">
-                                                    <div className="flex items-center gap-2 text-yellow-400">
-                                                        <Heart className="w-5 h-5 fill-current" />
+                                                    <div className="flex items-center gap-2 text-green-400">
+                                                        <CheckCircle className="w-5 h-5 fill-current" />
                                                         <span className="font-semibold">{item.likes}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-red-400">
@@ -351,6 +308,33 @@ export default function Explore({ roadmaps, nodes }: ExploreProps) {
                             );
                         })}
                     </div>
+
+                    {/* Paginación */}
+                    {pagination && pagination.last_page > 1 && (
+                        <div className="flex items-center justify-center gap-2 mt-8">
+                            <Button
+                                onClick={() => handlePageChange(pagination.current_page - 1)}
+                                disabled={pagination.current_page === 1}
+                                variant="outline"
+                                className="bg-gray-900 border-yellow-500/20 hover:border-yellow-500/40 text-yellow-400"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                            </Button>
+                            
+                            <span className="text-sm text-gray-400">
+                                Página {pagination.current_page} de {pagination.last_page}
+                            </span>
+                            
+                            <Button
+                                onClick={() => handlePageChange(pagination.current_page + 1)}
+                                disabled={pagination.current_page === pagination.last_page}
+                                variant="outline"
+                                className="bg-gray-900 border-yellow-500/20 hover:border-yellow-500/40 text-yellow-400"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </Button>
+                        </div>
+                    )}
 
                     {/* Mensaje si no hay resultados */}
                     {filteredItems.length === 0 && (

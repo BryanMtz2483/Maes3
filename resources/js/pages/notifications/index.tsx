@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import InstagramNav from '@/components/social/instagram-nav';
 import { Card } from '@/components/ui/card';
 import { usePage } from '@inertiajs/react';
-import { Bell, BellOff, Heart, MessageCircle, Bookmark, User, Trash2, Check, CheckCheck } from 'lucide-react';
+import { Bell, BellOff, Heart, MessageCircle, Bookmark, User, Trash2, Check, CheckCheck, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
 
@@ -98,7 +98,7 @@ export default function NotificationsIndex({ notifications: initialNotifications
             case 'roadmap_comment':
                 return <MessageCircle className="w-5 h-5 text-blue-400" />;
             case 'like':
-                return <Heart className="w-5 h-5 text-yellow-400 fill-current" />;
+                return <CheckCircle className="w-5 h-5 text-green-400 fill-current" />;
             case 'bookmark':
                 return <Bookmark className="w-5 h-5 text-yellow-400 fill-current" />;
             case 'follow':

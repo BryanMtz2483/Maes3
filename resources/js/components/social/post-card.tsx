@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Heart, MessageCircle, Bookmark, Share2, MoreHorizontal, ThumbsDown, Edit } from 'lucide-react';
+import { Heart, MessageCircle, Bookmark, Share2, MoreHorizontal, ThumbsDown, Edit, CheckCircle, Frown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { router, Link, usePage } from '@inertiajs/react';
 import CommentsModal from './comments-modal';
@@ -40,12 +40,12 @@ export default function PostCard({ post }: PostCardProps) {
     const [liked, setLiked] = useState(false);
     const [disliked, setDisliked] = useState(false);
     const [saved, setSaved] = useState(false);
-    const [likesCount, setLikesCount] = useState(post.reactions_count);
+    const [likesCount, setLikesCount] = useState(0);
     const [dislikesCount, setDislikesCount] = useState(0);
     const [commentsCount, setCommentsCount] = useState(post.comments_count);
     const [showComments, setShowComments] = useState(false);
-    const [isLiking, setIsLiking] = useState(false);
-    const [isDisliking, setIsDisliking] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [isUpdating, setIsUpdating] = useState(false);
 
     // Verificar si el usuario actual es el propietario del post
     const isOwner = auth?.user && (post.author_id === auth.user.id || post.user_id === auth.user.id);
@@ -59,115 +59,133 @@ export default function PostCard({ post }: PostCardProps) {
 
     // Cargar estado inicial de reacciones y bookmark del usuario
     useEffect(() => {
-        const loadUserReactions = async () => {
+        const loadData = async () => {
+            setLoading(true);
             try {
-                const response = await axios.get(`/reactions/statistics/${post.type}/${post.id}`);
-                setLiked(response.data.user_liked || false);
-                setDisliked(response.data.user_disliked || false);
-                setLikesCount(response.data.likes_count || 0);
-                setDislikesCount(response.data.dislikes_count || 0);
+                // Cargar reacciones y bookmarks en paralelo
+                const [reactionsResponse, bookmarkResponse] = await Promise.all([
+                    axios.get(`/reactions/statistics/${post.type}/${post.id}`),
+                    axios.get('/bookmarks/check', {
+                        params: {
+                            type: post.type,
+                            id: post.id
+                        }
+                    })
+                ]);
+
+                // Actualizar estados con los datos del servidor
+                setLiked(reactionsResponse.data.user_liked || false);
+                setDisliked(reactionsResponse.data.user_disliked || false);
+                setLikesCount(reactionsResponse.data.likes_count || 0);
+                setDislikesCount(reactionsResponse.data.dislikes_count || 0);
+                setSaved(bookmarkResponse.data.bookmarked || false);
             } catch (error) {
-                console.error('Error loading reactions:', error);
+                console.error('Error loading data:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
-        const loadBookmarkStatus = async () => {
-            try {
-                const response = await axios.get('/bookmarks/check', {
-                    params: {
-                        type: post.type,
-                        id: post.id
-                    }
-                });
-                setSaved(response.data.bookmarked || false);
-            } catch (error) {
-                console.error('Error loading bookmark status:', error);
-            }
-        };
-
-        loadUserReactions();
-        loadBookmarkStatus();
+        loadData();
     }, [post.id, post.type]);
 
     const handleLike = async () => {
-        if (isLiking) return;
+        if (isUpdating) return;
         
-        setIsLiking(true);
+        setIsUpdating(true);
+        const previousLiked = liked;
+        const previousDisliked = disliked;
+        const previousLikesCount = likesCount;
+        const previousDislikesCount = dislikesCount;
+        
+        // Actualización optimista (feedback inmediato)
         const newLikedState = !liked;
+        setLiked(newLikedState);
         
-        // Si ya tiene dislike, quitarlo primero
         if (disliked && newLikedState) {
             setDisliked(false);
             setDislikesCount(Math.max(0, dislikesCount - 1));
         }
         
-        // Actualización optimista
-        setLiked(newLikedState);
         setLikesCount(newLikedState ? likesCount + 1 : Math.max(0, likesCount - 1));
         
         try {
-            // Llamar a la API de reacciones
-            const response = await axios.post('/reactions/toggle', {
+            // Hacer el toggle en el servidor
+            await axios.post('/reactions/toggle', {
                 entity_type: post.type,
                 entity_id: post.id,
                 reaction_type: 'like',
             });
-
-            // Obtener el contador actualizado del servidor
-            const statsResponse = await axios.get(`/reactions/statistics/${post.type}/${post.id}`);
-            setLiked(statsResponse.data.user_liked || false);
-            setDisliked(statsResponse.data.user_disliked || false);
-            setLikesCount(statsResponse.data.likes_count || 0);
-            setDislikesCount(statsResponse.data.dislikes_count || 0);
             
+            // Sincronizar solo los contadores en background (sin cambiar el estado liked)
+            setTimeout(async () => {
+                try {
+                    const statsResponse = await axios.get(`/reactions/statistics/${post.type}/${post.id}`);
+                    setLikesCount(statsResponse.data.likes_count || 0);
+                    setDislikesCount(statsResponse.data.dislikes_count || 0);
+                } catch (e) {
+                    console.error('Error syncing counts:', e);
+                }
+            }, 300);
         } catch (error: any) {
             // Revertir en caso de error
-            setLiked(!newLikedState);
+            setLiked(previousLiked);
+            setDisliked(previousDisliked);
+            setLikesCount(previousLikesCount);
+            setDislikesCount(previousDislikesCount);
             console.error('Error al dar like:', error);
-            alert(`Error al dar like: ${error.response?.data?.message || error.message}`);
         } finally {
-            setIsLiking(false);
+            setIsUpdating(false);
         }
     };
 
     const handleDislike = async () => {
-        if (isDisliking) return;
+        if (isUpdating) return;
         
-        setIsDisliking(true);
+        setIsUpdating(true);
+        const previousLiked = liked;
+        const previousDisliked = disliked;
+        const previousLikesCount = likesCount;
+        const previousDislikesCount = dislikesCount;
+        
+        // Actualización optimista (feedback inmediato)
         const newDislikedState = !disliked;
+        setDisliked(newDislikedState);
         
-        // Si ya tiene like, quitarlo primero
         if (liked && newDislikedState) {
             setLiked(false);
             setLikesCount(Math.max(0, likesCount - 1));
         }
         
-        // Actualización optimista
-        setDisliked(newDislikedState);
         setDislikesCount(newDislikedState ? dislikesCount + 1 : Math.max(0, dislikesCount - 1));
         
         try {
-            // Llamar a la API de reacciones
-            const response = await axios.post('/reactions/toggle', {
+            // Hacer el toggle en el servidor
+            await axios.post('/reactions/toggle', {
                 entity_type: post.type,
                 entity_id: post.id,
                 reaction_type: 'dislike',
             });
 
-            // Obtener el contador actualizado del servidor
-            const statsResponse = await axios.get(`/reactions/statistics/${post.type}/${post.id}`);
-            setLiked(statsResponse.data.user_liked || false);
-            setDisliked(statsResponse.data.user_disliked || false);
-            setLikesCount(statsResponse.data.likes_count || 0);
-            setDislikesCount(statsResponse.data.dislikes_count || 0);
-            
+            // Sincronizar solo los contadores en background
+            setTimeout(async () => {
+                try {
+                    const statsResponse = await axios.get(`/reactions/statistics/${post.type}/${post.id}`);
+                    setLikesCount(statsResponse.data.likes_count || 0);
+                    setDislikesCount(statsResponse.data.dislikes_count || 0);
+                } catch (e) {
+                    console.error('Error syncing counts:', e);
+                }
+            }, 300);
         } catch (error: any) {
             // Revertir en caso de error
-            setDisliked(!newDislikedState);
+            setLiked(previousLiked);
+            setDisliked(previousDisliked);
+            setLikesCount(previousLikesCount);
+            setDislikesCount(previousDislikesCount);
             console.error('Error al dar dislike:', error);
-            alert(`Error al dar dislike: ${error.response?.data?.message || error.message}`);
         } finally {
-            setIsDisliking(false);
+            setIsUpdating(false);
         }
     };
 
@@ -293,16 +311,22 @@ export default function PostCard({ post }: PostCardProps) {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-10 w-10 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 disabled:opacity-50"
+                            className="h-10 w-10 text-green-400 hover:text-green-300 hover:bg-green-500/10 disabled:opacity-50 relative"
                             onClick={handleLike}
-                            disabled={isLiking}
+                            disabled={loading || isUpdating}
                         >
-                            <Heart
-                                className={`h-6 w-6 transition-all ${liked ? 'fill-yellow-400 text-yellow-400 scale-110' : ''}`}
+                            <CheckCircle
+                                className={`h-6 w-6 transition-all ${liked ? 'fill-green-400 text-green-400 scale-110' : ''} ${loading ? 'opacity-50' : ''}`}
                             />
+                            {liked && (
+                                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                </span>
+                            )}
                         </Button>
                         {likesCount > 0 && (
-                            <span className="text-sm font-semibold text-yellow-400">{likesCount}</span>
+                            <span className="text-sm font-semibold text-green-400">{likesCount}</span>
                         )}
                     </div>
                     <div className="flex items-center gap-1">
@@ -311,10 +335,10 @@ export default function PostCard({ post }: PostCardProps) {
                             size="icon"
                             className="h-10 w-10 text-red-400 hover:text-red-300 hover:bg-red-500/10 disabled:opacity-50"
                             onClick={handleDislike}
-                            disabled={isDisliking}
+                            disabled={loading || isUpdating}
                         >
-                            <ThumbsDown
-                                className={`h-6 w-6 transition-all ${disliked ? 'fill-red-400 text-red-400 scale-110' : ''}`}
+                            <Frown
+                                className={`h-6 w-6 transition-all ${disliked ? 'fill-red-400 text-red-400 scale-110' : ''} ${loading ? 'opacity-50' : ''}`}
                             />
                         </Button>
                         {dislikesCount > 0 && (

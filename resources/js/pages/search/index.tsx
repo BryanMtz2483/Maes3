@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { usePage } from '@inertiajs/react';
-import { MapPin, Users, BookOpen } from 'lucide-react';
+import { MapPin, Users, BookOpen, Heart, MessageCircle, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 
 interface SearchProps {
@@ -134,8 +134,8 @@ export default function SearchIndex({ results = {}, query = '' }: SearchProps) {
                                                 <Card className="p-4 bg-gradient-to-br from-gray-900 to-black border-yellow-500/20 hover:border-yellow-500/40 transition-all cursor-pointer">
                                                     <h3 className="font-semibold text-yellow-400 mb-2">{roadmap.name}</h3>
                                                     <div className="flex items-center gap-4 text-sm text-gray-400">
-                                                        <span>❤️ {roadmap.reactions_count}</span>
-                                                        <span>💬 {roadmap.comments_count}</span>
+                                                        <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-green-400" /> {roadmap.reactions_count}</span>
+                                                        <span className="flex items-center gap-1"><MessageCircle className="w-4 h-4" /> {roadmap.comments_count}</span>
                                                     </div>
                                                     {roadmap.tags && roadmap.tags.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 mt-2">
@@ -165,9 +165,9 @@ export default function SearchIndex({ results = {}, query = '' }: SearchProps) {
                                                         <p className="text-sm text-gray-400 mb-2">Por {node.author}</p>
                                                     )}
                                                     <div className="flex items-center gap-4 text-sm text-gray-400">
-                                                        <span>❤️ {node.reactions_count}</span>
-                                                        <span>💬 {node.comments_count}</span>
-                                                        {node.topic && <span className="text-yellow-600">📚 {node.topic}</span>}
+                                                        <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-green-400" /> {node.reactions_count}</span>
+                                                        <span className="flex items-center gap-1"><MessageCircle className="w-4 h-4" /> {node.comments_count}</span>
+                                                        {node.topic && <span className="text-yellow-600 flex items-center gap-1"><BookOpen className="w-4 h-4" /> {node.topic}</span>}
                                                     </div>
                                                 </Card>
                                             </Link>
@@ -222,8 +222,8 @@ export default function SearchIndex({ results = {}, query = '' }: SearchProps) {
                                         <Card className="p-4 bg-gradient-to-br from-gray-900 to-black border-yellow-500/20 hover:border-yellow-500/40 transition-all cursor-pointer">
                                             <h3 className="font-semibold text-yellow-400 mb-2">{roadmap.name}</h3>
                                             <div className="flex items-center gap-4 text-sm text-gray-400">
-                                                <span>❤️ {roadmap.reactions_count}</span>
-                                                <span>💬 {roadmap.comments_count}</span>
+                                                <span className="flex items-center gap-1"><Heart className="w-4 h-4" /> {roadmap.reactions_count}</span>
+                                                <span className="flex items-center gap-1"><MessageCircle className="w-4 h-4" /> {roadmap.comments_count}</span>
                                             </div>
                                             {roadmap.tags && roadmap.tags.length > 0 && (
                                                 <div className="flex flex-wrap gap-1 mt-2">
@@ -254,9 +254,9 @@ export default function SearchIndex({ results = {}, query = '' }: SearchProps) {
                                                 <p className="text-sm text-gray-400 mb-2">Por {node.author}</p>
                                             )}
                                             <div className="flex items-center gap-4 text-sm text-gray-400">
-                                                <span>❤️ {node.reactions_count}</span>
-                                                <span>💬 {node.comments_count}</span>
-                                                {node.topic && <span className="text-yellow-600">📚 {node.topic}</span>}
+                                                <span className="flex items-center gap-1"><Heart className="w-4 h-4" /> {node.reactions_count}</span>
+                                                <span className="flex items-center gap-1"><MessageCircle className="w-4 h-4" /> {node.comments_count}</span>
+                                                {node.topic && <span className="text-yellow-600 flex items-center gap-1"><BookOpen className="w-4 h-4" /> {node.topic}</span>}
                                             </div>
                                         </Card>
                                     </Link>

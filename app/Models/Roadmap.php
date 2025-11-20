@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Roadmap extends Model
@@ -72,6 +73,12 @@ class Roadmap extends Model
     public function reactions(): MorphMany
     {
         return $this->morphMany(Reaction::class, 'entity', 'entity_type', 'entity_id', 'roadmap_id');
+    }
+
+    // Relación: Estadísticas del roadmap
+    public function statistics(): HasOne
+    {
+        return $this->hasOne(RoadmapStatistics::class, 'roadmap_id', 'roadmap_id');
     }
 
     // Scope: Roadmaps principales (sin padre)

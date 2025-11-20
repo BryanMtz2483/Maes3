@@ -1,12 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import InstagramNav from '@/components/social/instagram-nav';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import ProfilePictureUpload from '@/components/profile/ProfilePictureUpload';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePage } from '@inertiajs/react';
-import { MapPin, Calendar, Award, Grid3x3, Bookmark as BookmarkIcon, Settings } from 'lucide-react';
+import { MapPin, Calendar, Award, Grid3x3, Bookmark as BookmarkIcon, Settings, ExternalLink, Heart, MessageCircle, BookOpen, CheckCircle } from 'lucide-react';
 
 interface ProfileProps {
     user: {
@@ -70,14 +70,13 @@ export default function Profile({ user, nodes, roadmaps, stats }: ProfileProps) 
                     {/* Profile Header */}
                     <Card className="p-8 border-yellow-500/20 bg-gradient-to-br from-gray-900 to-black mb-6">
                         <div className="flex flex-col md:flex-row gap-8">
-                            {/* Avatar */}
+                            {/* Avatar con upload */}
                             <div className="flex justify-center md:justify-start">
-                                <Avatar className="h-32 w-32 md:h-40 md:w-40 border-4 border-yellow-500">
-                                    <AvatarImage src={user.profile_pic} />
-                                    <AvatarFallback className="bg-yellow-500 text-black font-bold text-4xl">
-                                        {user.username[0]?.toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
+                                <ProfilePictureUpload 
+                                    user={user} 
+                                    size="xl" 
+                                    editable={isOwnProfile}
+                                />
                             </div>
 
                             {/* Profile Info */}
@@ -154,9 +153,9 @@ export default function Profile({ user, nodes, roadmaps, stats }: ProfileProps) 
                                         href={user.website} 
                                         target="_blank" 
                                         rel="noopener noreferrer"
-                                        className="text-yellow-400 hover:text-yellow-300 text-sm mt-2 inline-block"
+                                        className="text-yellow-400 hover:text-yellow-300 text-sm mt-2 inline-flex items-center gap-1"
                                     >
-                                        🔗 {user.website}
+                                        <ExternalLink className="w-4 h-4" /> {user.website}
                                     </a>
                                 )}
                             </div>
@@ -213,8 +212,8 @@ export default function Profile({ user, nodes, roadmaps, stats }: ProfileProps) 
                                                         </span>
                                                     )}
                                                     <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                                                        <span>❤️ {node.reactions_count}</span>
-                                                        <span>💬 {node.comments_count}</span>
+                                                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-green-400" /> {node.reactions_count}</span>
+                                                        <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {node.comments_count}</span>
                                                     </div>
                                                 </div>
                                             </Card>
@@ -264,8 +263,8 @@ export default function Profile({ user, nodes, roadmaps, stats }: ProfileProps) 
                                                         </p>
                                                     )}
                                                     <div className="flex items-center gap-2 mb-3">
-                                                        <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full">
-                                                            📚 {roadmap.nodes_count} nodos
+                                                        <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full flex items-center gap-1">
+                                                            <BookOpen className="w-3 h-3" /> {roadmap.nodes_count} nodos
                                                         </span>
                                                     </div>
                                                     {roadmap.tags && (
@@ -278,8 +277,8 @@ export default function Profile({ user, nodes, roadmaps, stats }: ProfileProps) 
                                                         </div>
                                                     )}
                                                     <div className="flex items-center gap-4 text-xs text-gray-500">
-                                                        <span>❤️ {roadmap.reactions_count}</span>
-                                                        <span>💬 {roadmap.comments_count}</span>
+                                                        <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-green-400" /> {roadmap.reactions_count}</span>
+                                                        <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {roadmap.comments_count}</span>
                                                     </div>
                                                 </div>
                                             </Card>

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { usePage } from '@inertiajs/react';
-import { ArrowLeft, Save, Eye, Map } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Map, Lightbulb } from 'lucide-react';
 import axios from 'axios';
 
 export default function RoadmapCreate() {
@@ -188,8 +188,8 @@ export default function RoadmapCreate() {
 
                             {/* Tips */}
                             <div className="bg-gradient-to-r from-purple-500/10 to-transparent border-l-4 border-purple-500 p-4 rounded-r-lg">
-                                <h3 className="text-sm font-bold text-purple-400 mb-2">
-                                    💡 Consejos para crear un buen roadmap
+                                <h3 className="text-sm font-bold text-purple-400 mb-2 flex items-center gap-2">
+                                    <Lightbulb className="w-4 h-4" /> Consejos para crear un buen roadmap
                                 </h3>
                                 <ul className="space-y-1 text-gray-400 text-xs">
                                     <li>• Organiza los nodos en orden lógico de aprendizaje</li>

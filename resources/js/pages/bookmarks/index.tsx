@@ -3,7 +3,7 @@ import { useState } from 'react';
 import InstagramNav from '@/components/social/instagram-nav';
 import { Card } from '@/components/ui/card';
 import { usePage, Link } from '@inertiajs/react';
-import { Heart, MessageCircle, ThumbsDown, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, ThumbsDown, Bookmark, CheckCircle, Frown } from 'lucide-react';
 
 interface BookmarksProps {
     roadmaps: Array<{
@@ -166,8 +166,8 @@ export default function BookmarksIndex({ roadmaps = [], nodes = [] }: BookmarksP
 
                                                     {/* Stats */}
                                                     <div className="flex items-center gap-6 mt-2">
-                                                        <div className="flex items-center gap-2 text-yellow-400">
-                                                            <Heart className="w-5 h-5 fill-current" />
+                                                        <div className="flex items-center gap-2 text-green-400">
+                                                            <CheckCircle className="w-5 h-5 fill-current" />
                                                             <span className="font-semibold">{(item as any).reactions_count}</span>
                                                         </div>
                                                         <div className="flex items-center gap-2 text-red-400">
